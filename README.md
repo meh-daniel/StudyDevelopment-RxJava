@@ -49,3 +49,47 @@ josh = donna.subscribe({ whatHappened -> reportToMangement(whatHappened) })
 <img src="https://github.com/meh-daniel/StudyDevelopment-RxJava/blob/main/photo-for-readme/Observeable-operator-observer.png" width="600" height="600">
 
 Подумайте об этом так: Наблюдаемый — это Говорящий, Оператор — Это Переводчик, а Наблюдатель — Слушатель..
+
+## Давайте создадим Observable
+Есть много способов сделать это, и мы перечислим некоторые из них ниже. Примеры могут стать несколько сложными, но не торопитесь, чтобы понять, что происходит в каждой строке.
+
+### Just
+Оператор just преобразует Item в Наблюдаемый и излучает его.
+```kotlin
+Observable.just("Hello Reactive World")
+    .subscribe { value -> println(value) }
+```
+Результат:
+```kotlin
+Hello Reactive World
+```
+Давайте добавим к этому некоторую сложность. Мы хотим знать, когда элемент получен, если есть ошибка и когда она завершается.
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .subscribe(
+        { value -> println("Received: $value") }, // onNext
+        { error -> println("Error: $error") },    // onError
+        { println("Completed!") }                 // onComplete
+    )
+```
+Результат:
+```kotlin
+Received: Apple
+Received: Orange
+Received: Banana
+Completed!
+```
+В этой ситуации у нас есть onNext , onError , и onComplete в лямбда-выражении. Их названия в значительной степени говорят сами за себя, но я хотел бы сгенерировать ошибку, чтобы проверить ее. Не беспокойтесь о методе map на данный момент, так как мы поговорим об этом позже.
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .map({ input -> throw RuntimeException() } )
+    .subscribe(
+        { value -> println("Received: $value") },
+        { error -> println("Error: $error") },
+        { println("Completed!") }
+    )
+```
+Результат:
+```kotlin
+I/System.out: Error: java.lang.RuntimeException
+```
