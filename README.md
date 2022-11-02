@@ -93,3 +93,111 @@ Observable.just("Apple", "Orange", "Banana")
 ```kotlin
 I/System.out: Error: java.lang.RuntimeException
 ```
+
+### From*
+
+Есть несколько способов, которые вы можете использовать, и некоторые из них перечислены ниже:
+
+```kotlin
+Observable.fromArray("Apple", "Orange", "Banana")
+    .subscribe { println(it) }
+```
+Результат:
+```kotlin
+Apple
+Orange
+Banana
+```
+Другой пример:
+```kotlin
+Observable.fromIterable(listOf("Apple", "Orange", "Banana"))
+    .subscribe(
+        { value -> println("Received: $value") },      // onNext
+        { error -> println("Error: $error") },         // onError
+        { println("Completed") }                       // onComplete
+    )
+```
+Результат:
+```kotlin
+Received: Apple
+Received: Orange
+Received: Banana
+Completed
+```
+
+### Create
+C помощью create вы можете создать Observable с нуля. Рассмотрим пример.
+Сначала создадим функцию, которая преобразует список в Observable:
+```kotlin
+fun getObservableFromList(myList: List<String>) =
+    Observable.create<String> { emitter ->
+        myList.forEach { kind ->
+            if (kind == "") {
+                emitter.onError(Exception("There's no value to show"))
+            }
+            emitter.onNext(kind)
+        }
+        emitter.onComplete()
+```
+Приведенная выше функция создаст string типа Observable, а затем прочитает каждый элемент списка и выполнит проверку, если он пуст, а если это так, то должна отображаться ошибка, в противном случае переходите к следующему до завершения.
+
+Во-вторых, давайте вызовем эту функцию из onCreate, чтобы протестировать ее. Запишите исключение onError, так как мы проверим его позже.
+```kotlin
+getObservableFromList(listOf("Apple", "Orange", "Banana"))
+    .subscribe { println("Received: $it") }
+```
+И вышесказанное приведет к:
+```kotlin
+Received: Apple
+Received: Orange
+Received: Banana
+```
+
+Теперь давайте протестируем onError, просто удалив строку "Orange", заменив ее пустой строкой и добавив onError в метод subscribe.
+```kotlin
+getObservableFromList(listOf("Apple", "", "Banana"))
+    .subscribe(
+        { v -> println("Received: $v") },
+        { e -> println("Error: $e") }
+    )
+```
+Результат:
+```kotlin
+Received: Apple
+Error: java.lang.Exception: There's no value to show
+```
+Обратите внимание, что на этот раз мы получили только первый элемент, и так как была ошибка со вторым, он прервал поток данных, и появилось сообщение об ошибке.
+
+### Interval
+Эта функция создаст бесконечную последовательность тиков, разделенных заданной длительностью.
+```kotlin
+Observable.intervalRange(
+    10L,     // Start
+    5L,      // Count
+    0L,      // Initial Delay
+    1L,      // Period
+    TimeUnit.SECONDS
+).subscribe { println("Result we just received: $it") }
+```
+Результат:
+```kotlin
+Result we just received: 10
+Result we just received: 11
+Result we just received: 12
+Result we just received: 13
+Result we just received: 14
+```
+
+
+В приведенном выше примере Observable излучает каждую секунду. Давайте проверим простой, бесконечный интервал.
+```kotlin
+Observable.interval(1000, TimeUnit.MILLISECONDS)
+    .subscribe { println("Result we just received: $it") }
+```
+Результат:
+```kotlin
+Result we just received: 0
+Result we just received: 1
+Result we just received: 2
+...
+```
