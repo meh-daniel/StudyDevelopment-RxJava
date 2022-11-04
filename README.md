@@ -352,21 +352,69 @@ subscribeOn (а также observeOn) нуждается в параметре S
 
 ### Scheduler.io()
 
+Scheduler.io() Это наиболее распространенные типы планировщика, которые используются. Они обычно используются для вещей, связанных с вводом-выводом, таких как сетевые запросы, операции файловой системы, и они поддерживаются пулом потоков. Пул потоков Java представляет собой группу рабочих потоков, ожидающих задания и повторно используемых много раз.
+
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .subscribeOn(Schedulers.io())
+    .subscribe{ v -> println("Received: $v") }
+```
 
 ### Scheduler.computation()
 
+Это очень похоже на ВВОД-вывод, поскольку он также резервируется пулом потоков, однако количество потоков, которые можно использовать, фиксируется к количеству ядер, присутствующих в устройстве. Скажем, у вас есть 2 ядра, это означает, что вы получите 2 потока, 4 ядра, 4 потока и так далее.
 
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .subscribeOn(Schedulers.computation())
+    .subscribe{ v -> println("Received: $v") }
+```
 
 ### Scheduler.newThread()
 
+Название здесь говорит само за себя, так как оно создаст новый поток для каждого активного Observable . Возможно, вы захотите быть осторожными, используя этот, так как если есть большое количество Observable действий, это может вызвать нестабильность.
 
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .subscribeOn(Schedulers.newThread())
+    .subscribe{ v -> println("Received: $v") }
+```
+
+Помните, что вы также можете задать количество одновременных потоков, которые вы хотите запустить, чтобы вы могли сделать .subscribeOn(Schedulers.newThread(), 8) чтобы иметь максимум 8 одновременных потоков.
 
 ### Scheduler.single()
 
+Резервная копия Scheduler выполняется одним потоком. Независимо от того, Observable, он будет работать только в одном потоке. Думайте об этом как о замене основной темы.
 
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .subscribeOn(Schedulers.single())
+    .subscribe{ v -> println("Received: $v") }
+```
 
 ### Scheduler.trampoline()
 
+Scheduler.trampoline() Это будет выполняться для любого текущего потока. Если это основной поток, он запустит код в очереди основного потока. Подобно немедленному планировщику, он также блокирует поток. trampoline можно использовать, когда у нас есть более одного Observable и мы хотим, чтобы они выполнялись по порядку.
 
+```kotlin
+Observable.just("Apple", "Orange", "Banana")
+    .subscribeOn(Schedulers.trampoline())
+    .subscribe{ v -> println("Received: $v") }
+```
 
 ### Scheduler.mainThread()
+
+AndroidSchedulers.mainThread() Вызов этого на observeOn вернет поток обратно в основной поток пользовательского интерфейса и, таким образом, внесет любые необходимые изменения в пользовательский интерфейс.
+
+### Executor Scheduler
+
+Executor Scheduler Это пользовательский планировщик ввода-вывода, где мы можем задать пользовательский пул потоков, указав, сколько потоков мы хотим в этом пуле. Его можно использовать в сценарии, где количество Observable может быть огромным для пула потоков ввода-вывода.
+
+```kotlin
+val executor = Executors.newFixedThreadPool(10)
+val pooledScheduler = Schedulers.from(executor)
+
+Observable.just("Apple", "Orange", "Banana")
+    .subscribeOn(pooledScheduler)
+    .subscribe{ v -> println("Received: $v") }
+```
