@@ -465,3 +465,39 @@ The Second Observable Received: Wood
     SingleTransformer
     MaybeTransformer
     CompletableTransformer
+
+
+# База 5- Операторы 
+
+Есть много операторов, которые вы можете добавить в цепочку Observable, но давайте поговорим о наиболее распространенных в форме ознакомления.
+
+## map()
+
+
+
+## flatMap()
+
+
+
+## zip()
+
+
+
+## concat()
+
+
+
+## merge()
+
+
+
+## filter()
+
+
+
+
+## repeat()
+
+
+
+## take()
