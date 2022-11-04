@@ -418,3 +418,50 @@ Observable.just("Apple", "Orange", "Banana")
     .subscribeOn(pooledScheduler)
     .subscribe{ v -> println("Received: $v") }
 ```
+
+# База 4 Трансформаторы
+
+С помощью трансформатора мы можем избежать повторения некоторого кода, применив наиболее часто используемые цепочки среди ваших Observable, мы будем сцеплять subscribeOn и observeOn к паре Observable ниже.
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+
+    Observable.just("Apple", "Orange", "Banana")
+        .compose(applyObservableAsync())
+        .subscribe { v -> println("The First Observable Received: $v") }
+
+    Observable.just("Water", "Fire", "Wood")
+        .compose(applyObservableAsync())
+        .subscribe { v -> println("The Second Observable Received: $v") }
+
+}
+
+fun <T> applyObservableAsync(): ObservableTransformer<T, T> {
+    return ObservableTransformer { observable ->
+        observable
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+}
+```
+
+В приведенном выше примере будет напечатано:
+
+```kotlin
+The First Observable Received: Apple
+The First Observable Received: Orange
+The First Observable Received: Banana
+The Second Observable Received: Water
+The Second Observable Received: Fire
+The Second Observable Received: Wood
+```
+
+Важно иметь в виду, что этот пример предназначен для Observable , и если вы работаете с другими излучателями, вам нужно изменить тип трансформатора следующим образом.
+
+    ObservableTransformer
+    FlowableTransformer
+    SingleTransformer
+    MaybeTransformer
+    CompletableTransformer
