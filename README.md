@@ -1,4 +1,6 @@
 # StudyDevelopment-RxJava
+Оффициальная документация: 
+https://reactivex.io/ 
 
 # Что такое RxJava?
 
